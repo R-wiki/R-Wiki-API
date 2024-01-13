@@ -6,8 +6,9 @@
 - 数据库使用MongoDB
 - 前端部分请见：[R-Wiki](https://github.com/yc005/R-Wiki)
 
-## 文档 | Docs
-启动项目后访问 http://\<r-wiki-api host\>/docs
+## 使用须知 | Reminder
+- 首次启动（数据库不存在admin权限用户）时，会自动创建新的admin用户，初始密码请留意命令行输出
+- 浏览文档请在启动项目后访问 http://\<r-wiki-api host\>/docs
 
 ## 使用Docker部署 | Deploy with Docker
 ```bash

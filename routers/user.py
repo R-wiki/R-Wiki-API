@@ -7,7 +7,7 @@ from pydantic import Field
 from models.base import BaseResponse
 from models.user import UserLoginRequest, UpdatePasswordRequest, CreateUserRequest
 from models.user import UserInfoModel, TokenModel, Level
-from models.user import UserLoginResponse, UserInfoResponse
+from models.user import UserLoginResponse, UserInfoResponse, CreateUserResponse
 
 import api.user as UserApi
 
@@ -34,9 +34,9 @@ def update_password(password: Annotated[UpdatePasswordRequest, Body()], current_
     UserApi.update_password(current_user, password.password)
     return BaseResponse(status=0, msg="Success")
 
-@user_api_router.post("/create_user", response_model=UserInfoResponse)
+@user_api_router.post("/create_user", response_model=CreateUserResponse)
 def create_user(new_user_info: Annotated[CreateUserRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.ADMIN:
         raise HTTPException(40105, "Permission denied, level < 4.")
     new_user = UserApi.create_user(new_user_info)
-    return UserInfoResponse(data=new_user)
+    return CreateUserResponse(data=new_user)

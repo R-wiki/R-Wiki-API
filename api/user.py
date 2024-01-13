@@ -1,3 +1,5 @@
+import random
+import string
 import hashlib
 import jwt
 from datetime import datetime, timedelta
@@ -5,7 +7,7 @@ from bson import ObjectId
 
 from config.general import CONFIG
 from config.db import db
-from models.user import UserLoginRequest, UserInfoModel, CreateUserRequest, Level
+from models.user import UserLoginRequest, UserInfoModel, CreateUserRequest, Level, NewUserModel
 from fastapi import HTTPException
 
 
@@ -47,7 +49,8 @@ def create_user(new_user_info: CreateUserRequest):
     existing_user = db.user.find_one({"username":new_user_info.username})
     if existing_user:
         raise HTTPException(40206, "Username already exists.")
-    password_hash = get_password_hash("123456")
+    characters = string.ascii_letters + string.digits
+    init_password = ''.join(random.choice(characters) for _ in range(8))
+    password_hash = get_password_hash(init_password)
     result = db.user.insert_one({"username":new_user_info.username, "password_hash":password_hash, "level":new_user_info.level})
-    new_user = db.user.find_one({"_id":result.inserted_id})
-    return UserInfoModel(id=str(new_user["_id"]), username=new_user["username"], level=new_user["level"])
+    return NewUserModel(id=str(result.inserted_id), password=init_password)

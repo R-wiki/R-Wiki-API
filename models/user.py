@@ -34,3 +34,10 @@ class UpdatePasswordRequest(BaseModel):
 class CreateUserRequest(BaseModel):
     username: str
     level: Level
+
+class NewUserModel(BaseModel):
+    id: str
+    password: str
+
+class CreateUserResponse(BaseResponse):
+    data: NewUserModel
