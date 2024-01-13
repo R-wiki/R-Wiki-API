@@ -19,14 +19,17 @@ def create_music_item(music_data:MusicInfoModel):
         except Exception as e:
             print(e)
             raise HTTPException(50101, "Database error.")
-        pass
+        return True
     else: # Create music
+        cursor = db.music.find_one({"name":music_data_dict["name"]})
+        if cursor:
+            raise HTTPException(40304, "Exists a music with same name.")
         try:
             db.music.insert_one(music_data_dict)
         except Exception as e:
             print(e)
             raise HTTPException(50101, "Database error.")
-    return True
+        return True
 
 def approve_music(music_id):
     verify_object_id(music_id)
@@ -48,22 +51,25 @@ def decline_music(music_id):
 
 def get_music_list_by_query(query, page, size):
     try:
-        cursor = db.music.find(query).sort("time", -1).skip((page-1)*size).limit(size)
+        count = db.music.count_documents(query)
+        cursor = db.music.find(query).sort("publish_time", -1).skip((page-1)*size).limit(size)
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
-    return cursor
+    return cursor, count
 
-def get_latest_music_list(page=1,size=10):
-    cursor = get_music_list_by_query({"show": True}, page, size)
-    return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor]
+def get_latest_music_list(page,size):
+    cursor, count = get_music_list_by_query({"show": True}, page, size)
+    return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor], count
 
-def get_pending_music_list(page=1,size=10):
-    cursor = get_music_list_by_query({"show": False}, page, size)
-    return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor]
+def get_pending_music_list(page,size):
+    cursor, count = get_music_list_by_query({"show": False}, page, size)
+    return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor], count
 
-def get_music_list_by_filter(album, solo, platform, language, page=1, size=10):
+def get_music_list_by_filter(q, album, solo, platform, language, page, size):
     query = {"show": True}
+    if q:
+        query["name"] = {"$regex":q}
     if album:
         query["album"] = {"$in": album}
     if solo:
@@ -76,8 +82,8 @@ def get_music_list_by_filter(album, solo, platform, language, page=1, size=10):
     if language:
         query["language"] = {"$in": language}
     print(query)
-    cursor = get_music_list_by_query(query, page, size)
-    return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor]
+    cursor, count = get_music_list_by_query(query, page, size)
+    return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor], count
 
 def get_music_detail(music_id):
     verify_object_id(music_id)

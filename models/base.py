@@ -7,4 +7,4 @@ class BaseResponse(BaseModel):
 
 class PagingDataModel(BaseModel):
     page: int | None = 1
-    size: int | None = 10
+    size: int | None = 20

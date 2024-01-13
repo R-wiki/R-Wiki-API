@@ -25,9 +25,9 @@ class MusicInfoModel(BaseModel):
     publish_time: datetime | None = None
     album: str
     pv_mv: str | None = None
-    platform: PlatformModel
-    staff: List[StaffModel]
-    note: str | None = None
+    platform: PlatformModel = PlatformModel()
+    staff: List[StaffModel] = []
+    note: str | None = ""
     show: bool = False
 
 class MusicIdRequest(BaseModel):
@@ -35,6 +35,7 @@ class MusicIdRequest(BaseModel):
 
 class MusicInfoResponse(BaseResponse):
     data: List[MusicInfoModel]
+    total: int
 
 class MusicDetailModel(MusicInfoModel):
     cover_url : str | None = None

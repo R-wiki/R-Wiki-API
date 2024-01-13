@@ -18,7 +18,7 @@ muisc_api_router = APIRouter(
     tags=["music"]
 )
 
-def get_paging_data(page:int=1, size:int=10):
+def get_paging_data(page:int=1, size:int=20):
     return PagingDataModel(page=page, size=size)
 
 @muisc_api_router.post("/create", response_model=BaseResponse)
@@ -50,24 +50,25 @@ def decline_music_item(music_id_data: Annotated[MusicIdRequest, Body()], current
 def get_pending_music(current_user: UserInfoModel = Depends(token_required), paging_data: PagingDataModel = Depends(get_paging_data)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    data = MusicApi.get_pending_music_list(paging_data.page, paging_data.size)
-    return MusicInfoResponse(data=data)
+    data, count = MusicApi.get_pending_music_list(paging_data.page, paging_data.size)
+    return MusicInfoResponse(data=data, total=count)
 
 @muisc_api_router.get("/latest", response_model=MusicInfoResponse)
 def get_latest_music(paging_data: PagingDataModel = Depends(get_paging_data)):
-    data = MusicApi.get_latest_music_list(paging_data.page, paging_data.size)
-    return MusicInfoResponse(data=data)
+    data, count = MusicApi.get_latest_music_list(paging_data.page, paging_data.size)
+    return MusicInfoResponse(data=data, total=count)
 
 @muisc_api_router.get("/filter", response_model=MusicInfoResponse)
 def get_music_by_filter(
+        q: str = "",
         album:    List[str] = Query(default=[]),
         solo:     List[str] = Query(default=[]),
         platform: List[str] = Query(default=[]),
         language: List[str] = Query(default=[]),
         paging_data: PagingDataModel = Depends(get_paging_data)
         ):
-    data = MusicApi.get_music_list_by_filter(album, solo, platform, language, paging_data.page, paging_data.size)
-    return MusicInfoResponse(status=0,msg="success",data=data)
+    data, count = MusicApi.get_music_list_by_filter(q, album, solo, platform, language, paging_data.page, paging_data.size)
+    return MusicInfoResponse(data=data, total=count)
 
 @muisc_api_router.get("/detail", response_model=MusicDetailResponse)
 def get_music_detail(music_id : str):
