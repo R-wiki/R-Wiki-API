@@ -5,8 +5,10 @@ from fastapi.openapi import utils as openapi_utils
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config.general import load_config
-
 load_config("config.ini")
+
+from config.db import init_user_check
+init_user_check()
 
 from routers.music import muisc_api_router
 from routers.user import user_api_router

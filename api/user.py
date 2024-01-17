@@ -39,7 +39,7 @@ def get_user_data_by_toekn(token: str):
         return UserInfoModel(id=jwt_data["id"], username=jwt_data["username"], level=Level(jwt_data["level"]))
     except Exception as e:
         print(e)
-        raise HTTPException(40104, "Invalid/outdated token.")
+        raise HTTPException(40104, "Invalid/expired token.")
     
 def update_password(user: UserInfoModel, password: str):
     password_hash = get_password_hash(password)
@@ -54,3 +54,10 @@ def create_user(new_user_info: CreateUserRequest):
     password_hash = get_password_hash(init_password)
     result = db.user.insert_one({"username":new_user_info.username, "password_hash":password_hash, "level":new_user_info.level})
     return NewUserModel(id=str(result.inserted_id), password=init_password)
+
+def get_user_list():
+    users = db.user.find()
+    result = []
+    for user in users:
+        result.append(UserInfoModel(id=str(user["_id"]), username=user["username"], level=Level(user["level"])))
+    return result

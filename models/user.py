@@ -41,3 +41,6 @@ class NewUserModel(BaseModel):
 
 class CreateUserResponse(BaseResponse):
     data: NewUserModel
+
+class UserListResponse(BaseResponse):
+    data: list[UserInfoModel]
