@@ -19,8 +19,11 @@ class VideoListResponse (BaseResponse):
     data: List[VideoItemModel] = []
     total: int
 
+class VideoDetailModel(VideoItemModel):
+    url: str = ""
+
 class VideoDetailResponse(BaseResponse):
-    data: VideoItemModel
+    data: VideoDetailModel
 
 class VideoIdRequest(BaseModel):
     video_id: str

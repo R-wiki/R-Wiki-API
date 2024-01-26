@@ -3,7 +3,7 @@ from bson import ObjectId
 from fastapi import HTTPException
 
 from config.db import db
-from models.video import VideoItemModel
+from models.video import VideoItemModel, VideoDetailModel
 
 from .general import verify_object_id
 
@@ -106,4 +106,7 @@ def get_video_detail(video_id):
         raise HTTPException(50101, "Database error.")
     if not cursor:
         raise HTTPException(40301, "Music not exists.")
-    return VideoItemModel(**cursor)
+    return VideoDetailModel(
+        url="//www.bilibili.com/blackboard/html5mobileplayer.html?bvid={}&cid={}".format(cursor["bvid"],cursor["cid"]),
+        **cursor
+    )

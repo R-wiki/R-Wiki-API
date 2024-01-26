@@ -96,7 +96,7 @@ def get_pic_detail(pic_id):
     if not cursor:
         raise HTTPException(40301, "Music not exists.")
     # TODO: Get real pic urls here
-    real_urls = []
+    real_urls = cursor["pics"]
     return PicDetailModel(
         urls=real_urls,
         **cursor
