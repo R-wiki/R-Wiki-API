@@ -1,3 +1,4 @@
+from functools import lru_cache
 from bson import ObjectId
 import requests
 
@@ -86,6 +87,7 @@ def get_music_list_by_filter(q, album, solo, platform, language, page, size):
     cursor, count = get_music_list_by_query(query, page, size)
     return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor], count
 
+@lru_cache(maxsize=64)
 def get_netease_detail(netease_id):
     cover_url = ""
     play_url  = ""
@@ -105,6 +107,7 @@ def get_netease_detail(netease_id):
         print("Error when get music info in netease:", str(e))
     return cover_url, play_url, lyric
 
+@lru_cache(maxsize=64)
 def try_search_in_kugou(music_name):
     cover_url = ""
     play_url  = ""
