@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from .base import BaseResponse
 
 class PicItemModel(BaseModel):
-    id: str | None = ""
+    id: str | None = None
     name: str
     date: datetime
     type: str
@@ -20,6 +20,10 @@ class PicDetailModel(PicItemModel):
 
 class PicListResponse(BaseResponse):
     data: List[PicItemModel] = []
+    total: int
 
 class PicDetailResponse(BaseResponse):
-    data: PicDetailModel = []
+    data: PicDetailModel
+
+class PicIdRequest(BaseModel):
+    pic_id: str

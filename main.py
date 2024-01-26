@@ -12,6 +12,8 @@ init_user_check()
 
 from routers.music import muisc_api_router
 from routers.user import user_api_router
+from routers.pic import pic_api_router
+from routers.video import video_api_router
 
 from models.base import BaseResponse
 
@@ -28,6 +30,8 @@ openapi_utils.validation_error_response_definition = {
 
 app.include_router(muisc_api_router)
 app.include_router(user_api_router)
+app.include_router(pic_api_router)
+app.include_router(video_api_router)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
