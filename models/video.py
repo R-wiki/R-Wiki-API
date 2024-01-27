@@ -27,3 +27,7 @@ class VideoDetailResponse(BaseResponse):
 
 class VideoIdRequest(BaseModel):
     video_id: str
+
+class VideoFastCreateRequest(BaseModel):
+    bvid: str
+    type: str = ""

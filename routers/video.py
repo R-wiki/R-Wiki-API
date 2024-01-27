@@ -7,7 +7,7 @@ from .user import token_required
 
 from models.base import BaseResponse, PagingDataModel
 from models.user import UserInfoModel, Level
-from models.video import VideoItemModel, VideoDetailResponse, VideoListResponse, VideoIdRequest
+from models.video import VideoItemModel, VideoDetailResponse, VideoListResponse, VideoIdRequest, VideoFastCreateRequest
 
 import api.video as VideoApi
 
@@ -22,6 +22,13 @@ def get_paging_data(page:int=1, size:int=20):
 @video_api_router.post("/create",response_model=BaseResponse)
 def create_video_item(video_data: Annotated[VideoItemModel, Body()], current_user: UserInfoModel = Depends(token_required)):
     result = VideoApi.create_video_item(video_data)
+    if not result:
+        raise HTTPException(40302, "Create/Update video failed.")
+    return BaseResponse()
+
+@video_api_router.post("/fast_create", response_model=BaseResponse)
+def create_video_by_bvid(bvid_data: Annotated[VideoFastCreateRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+    result = VideoApi.create_video_by_bvid(bvid_data.bvid, bvid_data.type)
     if not result:
         raise HTTPException(40302, "Create/Update video failed.")
     return BaseResponse()

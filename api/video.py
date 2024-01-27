@@ -1,3 +1,6 @@
+from functools import lru_cache
+from datetime import datetime
+import requests
 from bson import ObjectId
 
 from fastapi import HTTPException
@@ -110,3 +113,23 @@ def get_video_detail(video_id):
         url="//www.bilibili.com/blackboard/html5mobileplayer.html?bvid={}&cid={}".format(cursor["bvid"],cursor["cid"]),
         **cursor
     )
+
+def create_video_by_bvid(bvid, video_type=""):
+    BILI_DETAIL_URL = "https://api.bilibili.com/x/web-interface/view?bvid={}"
+    header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36"}
+    try:
+        bili_req = requests.get(BILI_DETAIL_URL.format(bvid), headers = header)
+        bili_data = bili_req.json()
+        new_video = VideoItemModel(
+            name            = bili_data["data"]["title"],
+            publish_time    = datetime.fromtimestamp(bili_data["data"]["pubdate"]),
+            type            = video_type,
+            bvid            = bvid,
+            cid             = str(bili_data["data"]["cid"]),
+            duration        = bili_data["data"]["duration"],
+            show            = False
+        )
+    except Exception as e:
+        raise HTTPException(50102, "External API Error: Bilibili: "+ str(e))
+    create_video_item(new_video)
+    return True
