@@ -4,6 +4,7 @@ import requests
 
 from fastapi import HTTPException
 
+from config.general import CONFIG
 from config.db import db
 from models.music import MusicInfoModel, MusicDetailModel
 
@@ -133,6 +134,30 @@ def try_search_in_kugou(music_name):
         print("Error when get music info in kugou:", str(e))
     return cover_url, play_url, lyric
 
+def get_msuic_info_by_aio_api(music_data):
+    cover_url = ""
+    play_url  = ""
+    lyric     = ""
+    music_info_url = CONFIG["MUSIC"]["AIO_INFO_API"]
+    token = CONFIG["MUSIC"]["AIO_INFO_API_TOKEN"]
+    platform = ""
+    query_key = ""
+    if music_data["platform"]["netease"] != None:
+        platform = "netease"
+        query_key = music_data["platform"]["netease"]
+    else:
+        platform = "kugou"
+        query_key = music_data["name"]
+    try:
+        info_req = requests.get(music_info_url + "?platform={}&key={}&token={}".format(platform, query_key, token), timeout=10)
+        info_data = info_req.json()
+        cover_url = info_data["cover_url"]
+        play_url  = info_data["play_url"]
+        lyric     = info_data["lyric"]
+    except Exception as e:
+        print("Error when get music info in kugou:", str(e))
+    return cover_url, play_url, lyric
+
 def get_music_detail(music_id):
     verify_object_id(music_id)
     try:
@@ -146,10 +171,13 @@ def get_music_detail(music_id):
     cover_url = ""
     play_url  = ""
     lyric     = ""
-    if cursor["platform"]["netease"] != None: 
-        cover_url ,play_url, lyric = get_netease_detail(cursor["platform"]["netease"])
+    if CONFIG["MUSIC"]["AIO_INFO_API"]:
+        cover_url ,play_url, lyric = get_msuic_info_by_aio_api(cursor)
     else:
-        cover_url ,play_url, lyric = try_search_in_kugou(cursor["name"])
+        if cursor["platform"]["netease"] != None: 
+            cover_url ,play_url, lyric = get_netease_detail(cursor["platform"]["netease"])
+        else:
+            cover_url ,play_url, lyric = try_search_in_kugou(cursor["name"])
     return MusicDetailModel(
         id          = str(cursor["_id"]), 
         cover_url   = cover_url, 
