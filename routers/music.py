@@ -12,6 +12,7 @@ from models.music import MusicInfoModel
 from models.music import MusicInfoResponse, MusicDetailResponse
 
 import api.music as MusicApi
+from api.general import user_action_log
 
 muisc_api_router = APIRouter(
     prefix="/music",
@@ -26,6 +27,7 @@ def create_music_item(music_data: Annotated[MusicInfoModel, Body()], current_use
     result = MusicApi.create_music_item(music_data)
     if not result:
         raise HTTPException(40302, "Create/Update music failed.")
+    user_action_log(current_user.username, "music", "create", None, music_data.name)
     return BaseResponse()
 
 @muisc_api_router.post("/approve", response_model=BaseResponse)
@@ -35,6 +37,7 @@ def approve_music_item(music_id_data: Annotated[MusicIdRequest, Body()], current
     result = MusicApi.approve_music(music_id_data.music_id)
     if not result:
         raise HTTPException(40303, "Approve/Decline music failed.")
+    user_action_log(current_user.username, "music", "approve", music_id_data.music_id)
     return BaseResponse()
 
 @muisc_api_router.post("/decline", response_model=BaseResponse)
@@ -44,6 +47,7 @@ def decline_music_item(music_id_data: Annotated[MusicIdRequest, Body()], current
     result = MusicApi.decline_music(music_id_data.music_id)
     if not result:
         raise HTTPException(40303, "Approve/Decline music failed.")
+    user_action_log(current_user.username, "music", "decline", music_id_data.music_id)
     return BaseResponse()
 
 @muisc_api_router.get("/pending", response_model=MusicInfoResponse)

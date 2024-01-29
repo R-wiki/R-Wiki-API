@@ -8,6 +8,7 @@ from .user import token_required
 from models.base import BaseResponse, PagingDataModel
 from models.user import UserInfoModel, Level
 from models.pic import PicItemModel, PicIdRequest, PicListResponse, PicDetailModel, PicDetailResponse
+from api.general import user_action_log
 
 import api.pic as PicApi
 
@@ -24,6 +25,7 @@ def create_pic_item(pic_data: Annotated[PicItemModel, Body()], current_user: Use
     result = PicApi.create_pic_item(pic_data)
     if not result:
         raise HTTPException(40302, "Create/Update pic failed.")
+    user_action_log(current_user.username, "pic", "create", None, pic_data.name)
     return BaseResponse()
 
 @pic_api_router.post("/approve", response_model=BaseResponse)
@@ -33,15 +35,17 @@ def approve_pic_item(pic_id_data: Annotated[PicIdRequest, Body()], current_user:
     result = PicApi.approve_pic(pic_id_data.pic_id)
     if not result:
         raise HTTPException(40303, "Approve/Decline pic failed.")
+    user_action_log(current_user.username, "pic", "approve", pic_id_data.pic_id, "")
     return BaseResponse()
 
 @pic_api_router.post("/decline", response_model=BaseResponse)
 def decline_pic_item(pic_id_data: Annotated[PicIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = PicApi.decline_music(pic_id_data.music_id)
+    result = PicApi.decline_pic(pic_id_data.pic_id)
     if not result:
         raise HTTPException(40303, "Approve/Decline pic failed.")
+    user_action_log(current_user.username, "pic", "decline", pic_id_data.pic_id, "")
     return BaseResponse()
 
 @pic_api_router.get("/pending", response_model=PicListResponse)

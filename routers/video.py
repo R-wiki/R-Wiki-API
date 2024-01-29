@@ -10,6 +10,7 @@ from models.user import UserInfoModel, Level
 from models.video import VideoItemModel, VideoDetailResponse, VideoListResponse, VideoIdRequest, VideoFastCreateRequest
 
 import api.video as VideoApi
+from api.general import user_action_log
 
 video_api_router = APIRouter(
     prefix="/video",
@@ -24,6 +25,7 @@ def create_video_item(video_data: Annotated[VideoItemModel, Body()], current_use
     result = VideoApi.create_video_item(video_data)
     if not result:
         raise HTTPException(40302, "Create/Update video failed.")
+    user_action_log(current_user.username, "video", "create", None, video_data.name)
     return BaseResponse()
 
 @video_api_router.post("/fast_create", response_model=BaseResponse)
@@ -31,6 +33,7 @@ def create_video_by_bvid(bvid_data: Annotated[VideoFastCreateRequest, Body()], c
     result = VideoApi.create_video_by_bvid(bvid_data.bvid, bvid_data.type)
     if not result:
         raise HTTPException(40302, "Create/Update video failed.")
+    user_action_log(current_user.username, "video", "fast_create", None, bvid_data.bvid)
     return BaseResponse()
 
 @video_api_router.post("/approve", response_model=BaseResponse)
@@ -40,15 +43,17 @@ def approve_video_item(video_id_data: Annotated[VideoIdRequest, Body()], current
     result = VideoApi.approve_video(video_id_data.video_id)
     if not result:
         raise HTTPException(40303, "Approve/Decline video failed.")
+    user_action_log(current_user.username, "video", "approve", video_id_data.video_id, "")
     return BaseResponse()
 
 @video_api_router.post("/decline", response_model=BaseResponse)
 def decline_video_item(video_id_data: Annotated[VideoIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = VideoApi.decline_music(video_id_data.music_id)
+    result = VideoApi.decline_video(video_id_data.video_id)
     if not result:
         raise HTTPException(40303, "Approve/Decline video failed.")
+    user_action_log(current_user.username, "video", "decline", video_id_data.video_id, "")
     return BaseResponse()
 
 @video_api_router.get("/pending", response_model=VideoListResponse)
