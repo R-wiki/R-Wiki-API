@@ -20,5 +20,5 @@ def user_action_log(username, type, action, target_id=None, info=""):
         "action": action,
         "target_id": target_id,
         "info": info,
-        "datetime": datetime.now()
+        "time": datetime.now()
     })
