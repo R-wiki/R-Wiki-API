@@ -149,13 +149,20 @@ def get_msuic_info_by_aio_api(music_data):
         platform = "kugou"
         query_key = music_data["name"]
     try:
-        info_req = requests.get(music_info_url + "?platform={}&key={}&token={}".format(platform, query_key, token), timeout=10)
-        info_data = info_req.json()
-        cover_url = info_data["cover_url"]
-        play_url  = info_data["play_url"]
-        lyric     = info_data["lyric"]
+        cover_url, play_url, lyric = call_aio_api(platform, query_key, token)
     except Exception as e:
         print("Error when get music info in kugou:", str(e))
+    return cover_url, play_url, lyric
+
+@lru_cache(maxsize=64)
+def call_aio_api(platform, key, token):
+    music_info_url = CONFIG["MUSIC"]["AIO_INFO_API"]
+    token = CONFIG["MUSIC"]["AIO_INFO_API_TOKEN"]
+    info_req = requests.get(music_info_url + "?platform={}&key={}&token={}".format(platform, key, token), timeout=10)
+    info_data = info_req.json()
+    cover_url = info_data["cover_url"]
+    play_url  = info_data["play_url"]
+    lyric     = info_data["lyric"]
     return cover_url, play_url, lyric
 
 def get_music_detail(music_id):
