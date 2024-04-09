@@ -16,7 +16,7 @@ lyric_api_router = APIRouter(
     tags=["lyric"]
 )
 
-@lyric_api_router.get("/", response_model=LyricResponse)
+@lyric_api_router.get("/search", response_model=LyricResponse)
 def get_music_by_filter(
         q: str = "",
         ):
