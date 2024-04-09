@@ -10,10 +10,11 @@ load_config("config.ini")
 from config.db import init_user_check
 init_user_check()
 
-from routers.music import muisc_api_router
+from routers.music import music_api_router
 from routers.user import user_api_router
 from routers.pic import pic_api_router
 from routers.video import video_api_router
+from routers.lyric import lyric_api_router
 
 from models.base import BaseResponse
 
@@ -28,8 +29,9 @@ openapi_utils.validation_error_response_definition = {
     },
 }
 
-app.include_router(muisc_api_router)
 app.include_router(user_api_router)
+app.include_router(music_api_router)
+app.include_router(lyric_api_router)
 app.include_router(pic_api_router)
 app.include_router(video_api_router)
 
