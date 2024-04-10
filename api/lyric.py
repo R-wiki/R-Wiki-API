@@ -11,9 +11,13 @@ def search_lyric(q=""):
     else:
         query_result = db.lyric.aggregate([
             {
+                '$sort': {
+                    'time_mark': 1
+                }
+            }, {
                 '$match': {
                     'text': {
-                        '$regex': q,
+                        '$regex': q
                     }
                 }
             }, {
@@ -32,6 +36,10 @@ def search_lyric(q=""):
                     'localField': '_id', 
                     'foreignField': '_id', 
                     'as': 'data'
+                }
+            }, {
+                '$sort': {
+                    'data.publish_time': -1
                 }
             }
         ])
