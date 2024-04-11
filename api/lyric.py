@@ -11,14 +11,15 @@ def search_lyric(q=""):
     else:
         query_result = db.lyric.aggregate([
             {
-                '$sort': {
-                    'time_mark': 1
-                }
-            }, {
                 '$match': {
                     'text': {
                         '$regex': q
                     }
+                }
+            }, {
+                '$sort': {
+                    'music_id': 1, 
+                    'time_mark': 1
                 }
             }, {
                 '$group': {
