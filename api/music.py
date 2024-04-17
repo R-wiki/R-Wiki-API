@@ -138,8 +138,6 @@ def get_msuic_info_by_aio_api(music_data):
     cover_url = ""
     play_url  = ""
     lyric     = ""
-    music_info_url = CONFIG["MUSIC"]["AIO_INFO_API"]
-    token = CONFIG["MUSIC"]["AIO_INFO_API_TOKEN"]
     platform = ""
     query_key = ""
     if music_data["platform"]["netease"] != None:
@@ -149,15 +147,15 @@ def get_msuic_info_by_aio_api(music_data):
         platform = "kugou"
         query_key = music_data["name"]
     try:
-        cover_url, play_url, lyric = call_aio_api(platform, query_key, token)
+        cover_url, play_url, lyric = call_aio_api(platform, query_key)
     except Exception as e:
         print("Error when get music info in kugou:", str(e))
     return cover_url, play_url, lyric
 
 @lru_cache(maxsize=64)
-def call_aio_api(platform, key, token):
-    music_info_url = CONFIG["MUSIC"]["AIO_INFO_API"]
-    token = CONFIG["MUSIC"]["AIO_INFO_API_TOKEN"]
+def call_aio_api(platform, key):
+    music_info_url = CONFIG["EXTERNAL_API"]["AIO_MUSIC_API"]
+    token = CONFIG["EXTERNAL_API"]["AIO_MUSIC_API_TOKEN"]
     info_req = requests.get(music_info_url + "?platform={}&key={}&token={}".format(platform, key, token), timeout=10)
     info_data = info_req.json()
     cover_url = info_data["cover_url"]
@@ -178,7 +176,7 @@ def get_music_detail(music_id):
     cover_url = ""
     play_url  = ""
     lyric     = ""
-    if CONFIG["MUSIC"]["AIO_INFO_API"]:
+    if CONFIG["EXTERNAL_API"]["AIO_MUSIC_API"]:
         cover_url ,play_url, lyric = get_msuic_info_by_aio_api(cursor)
     else:
         if cursor["platform"]["netease"] != None: 

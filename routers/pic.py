@@ -7,7 +7,7 @@ from .user import token_required
 
 from models.base import BaseResponse, PagingDataModel
 from models.user import UserInfoModel, Level
-from models.pic import PicItemModel, PicIdRequest, PicListResponse, PicDetailModel, PicDetailResponse
+from models.pic import PicItemModel, PicIdRequest, PicListResponse, PicDetailModel, PicDetailResponse, SinglePicListResponse
 from api.general import user_action_log
 
 import api.pic as PicApi
@@ -75,3 +75,8 @@ def get_pic_by_filter(
 def get_pic_detail(pic_id : str):
     data = PicApi.get_pic_detail(pic_id)
     return PicDetailResponse(data=data)
+
+@pic_api_router.get("/ai_search", response_model=SinglePicListResponse)
+def get_pic_detail(q : str):
+    data, count = PicApi.ai_search(q)
+    return SinglePicListResponse(data=data, total=count)

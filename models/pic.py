@@ -27,3 +27,13 @@ class PicDetailResponse(BaseResponse):
 
 class PicIdRequest(BaseModel):
     pic_id: str
+
+class SinglePicModel(BaseModel):
+    id: str = ""
+    set_id: str = ""
+    path: str = ""
+    url: str = ""
+    
+class SinglePicListResponse(BaseResponse):
+    data: List[SinglePicModel] = []
+    total: int

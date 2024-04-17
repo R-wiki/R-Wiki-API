@@ -1,11 +1,12 @@
 from bson import ObjectId
+import requests
 
 from fastapi import HTTPException
 import oss2
 
 from config.general import CONFIG
 from config.db import db
-from models.pic import PicItemModel, PicDetailModel
+from models.pic import PicItemModel, PicDetailModel, SinglePicModel
 
 from .general import verify_object_id
 
@@ -128,3 +129,42 @@ def get_pic_detail(pic_id):
         urls=real_urls,
         **cursor
     )
+
+def ai_search(q):
+    vector_api_url = CONFIG["EXTERNAL_API"]["TEXT_VECTOR_API"]
+    vector_api_token = CONFIG["EXTERNAL_API"]["TEXT_VECTOR_API_TOKEN"]
+    if vector_api_url:
+        try:
+            vector_req = requests.get(vector_api_url + "?q={}&token={}".format(q, vector_api_token), timeout=30)
+            vector_data = vector_req.json()["vector"]
+            query_result = db.pic_vector.aggregate([
+                {
+                    '$vectorSearch': {
+                        'queryVector': vector_data, 
+                        'path': 'vector', 
+                        'numCandidates': 10, 
+                        'index': 'vector_index', 
+                        'limit': 5, 
+                        'filter': {}
+                    }
+                }, {
+                    '$project': {
+                        '_id': 1, 
+                        'set_id': 1, 
+                        'path': 1
+                    }
+                }
+            ])
+            single_pic_list = []
+            for pic in query_result:
+                single_pic_list.append(SinglePicModel(
+                    id      = str(pic["_id"]),
+                    set_id  = str(pic["set_id"]),
+                    path    = pic["path"],
+                    url     = get_signed_pic_url(pic["path"], 'image/resize,m_lfit,w_1920,h_1080')
+                ))
+            return single_pic_list, len(single_pic_list)
+        except:
+            return [], 0
+    else:
+        return [], 0
