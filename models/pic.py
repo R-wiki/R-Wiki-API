@@ -37,3 +37,6 @@ class SinglePicModel(BaseModel):
 class SinglePicListResponse(BaseResponse):
     data: List[SinglePicModel] = []
     total: int
+
+class SinglePicResponse(BaseResponse):
+    data: SinglePicModel

@@ -13,9 +13,15 @@ from .general import verify_object_id
 OSS_AUTH = oss2.Auth(CONFIG["OSS"]["AccessKey_ID"], CONFIG["OSS"]["AccessKey_Secret"])
 OSS_BUCKET = oss2.Bucket(OSS_AUTH, CONFIG["OSS"]["Endpoint"], CONFIG["OSS"]["Bucket"])
 
-def get_signed_pic_url(path, style=""):
+def get_signed_pic_url(path, thumbnail=True, size=0):
     if "http" in path:
         return path
+    if thumbnail:
+        size = CONFIG["PIC"]["Thumbnail_Size"]
+    if size !=0:
+        style = "image/resize,m_lfit,w_{0},h_{0}".format(size)
+    else:
+        style = ""
     url = OSS_BUCKET.sign_url('GET', path, 10 * 60, params={'x-oss-process': style})
     return url
 
@@ -75,7 +81,7 @@ def get_latest_pic_list(page,size):
     pic_item_list = []
     for pic_item in cursor:
         pic_item["id"] = str(pic_item["_id"])
-        pic_item["cover"] = get_signed_pic_url(pic_item["pics"][0], 'image/resize,m_lfit,w_1920,h_1080')
+        pic_item["cover"] = get_signed_pic_url(pic_item["pics"][0], thumbnail=True)
         pic_item_list.append(PicItemModel(**pic_item))
     return pic_item_list, count
 
@@ -84,7 +90,7 @@ def get_pending_pic_list(page,size):
     pic_item_list = []
     for pic_item in cursor:
         pic_item["id"] = str(pic_item["_id"])
-        pic_item["cover"] = get_signed_pic_url(pic_item["pics"][0], 'image/resize,m_lfit,w_1920,h_1080')
+        pic_item["cover"] = get_signed_pic_url(pic_item["pics"][0], thumbnail=True)
         pic_item_list.append(PicItemModel(**pic_item))
     return pic_item_list, count
 
@@ -109,7 +115,7 @@ def get_pic_list_by_filter(q, pic_type, year, month, page, size):
     pic_item_list = []
     for pic_item in cursor:
         pic_item["id"] = str(pic_item["_id"])
-        pic_item["cover"] = get_signed_pic_url(pic_item["pics"][0], 'image/resize,m_lfit,w_1920,h_1080')
+        pic_item["cover"] = get_signed_pic_url(pic_item["pics"][0], thumbnail=True)
         pic_item_list.append(PicItemModel(**pic_item))
     return pic_item_list, count
 
@@ -123,11 +129,20 @@ def get_pic_detail(pic_id):
     if not cursor:
         raise HTTPException(40301, "Music not exists.")
     # TODO: Get real pic urls here
-    cursor["cover"] = get_signed_pic_url(cursor["pics"][0], 'image/resize,m_lfit,w_1920,h_1080')
-    real_urls = [get_signed_pic_url(i) for i in cursor["pics"]]
+    cursor["cover"] = get_signed_pic_url(cursor["pics"][0], thumbnail=True)
+    real_urls = [get_signed_pic_url(i, thumbnail=True) for i in cursor["pics"]]
     return PicDetailModel(
         urls=real_urls,
         **cursor
+    )
+
+def get_original_pic(path):
+    real_url = get_signed_pic_url(path, thumbnail=False)
+    return SinglePicModel(
+        id      = "",
+        set_id  = "",
+        path    = path,
+        url     = real_url
     )
 
 def ai_search(q):
@@ -161,7 +176,7 @@ def ai_search(q):
                     id      = str(pic["_id"]),
                     set_id  = str(pic["set_id"]),
                     path    = pic["path"],
-                    url     = get_signed_pic_url(pic["path"], 'image/resize,m_lfit,w_1920,h_1080')
+                    url     = get_signed_pic_url(pic["path"], thumbnail=True)
                 ))
             return single_pic_list, len(single_pic_list)
         except:

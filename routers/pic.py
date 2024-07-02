@@ -7,7 +7,7 @@ from .user import token_required
 
 from models.base import BaseResponse, PagingDataModel
 from models.user import UserInfoModel, Level
-from models.pic import PicItemModel, PicIdRequest, PicListResponse, PicDetailModel, PicDetailResponse, SinglePicListResponse
+from models.pic import PicItemModel, PicIdRequest, PicListResponse, PicDetailModel, PicDetailResponse, SinglePicListResponse, SinglePicResponse
 from api.general import user_action_log
 
 import api.pic as PicApi
@@ -75,6 +75,11 @@ def get_pic_by_filter(
 def get_pic_detail(pic_id : str):
     data = PicApi.get_pic_detail(pic_id)
     return PicDetailResponse(data=data)
+
+@pic_api_router.get("/original", response_model=SinglePicResponse)
+def get_original_pic(path: str):
+    data = PicApi.get_original_pic(path)
+    return SinglePicResponse(data=data)
 
 @pic_api_router.get("/ai_search", response_model=SinglePicListResponse)
 def get_pic_detail(q : str):

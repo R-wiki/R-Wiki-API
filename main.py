@@ -18,7 +18,9 @@ from routers.lyric import lyric_api_router
 
 from models.base import BaseResponse
 
-app = FastAPI()
+app = FastAPI(
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1}
+)
 
 openapi_utils.validation_error_response_definition = {
     "title": "HTTPValidationError",
