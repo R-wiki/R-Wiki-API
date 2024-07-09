@@ -13,7 +13,7 @@ from .general import verify_object_id
 OSS_AUTH = oss2.Auth(CONFIG["OSS"]["AccessKey_ID"], CONFIG["OSS"]["AccessKey_Secret"])
 OSS_BUCKET = oss2.Bucket(OSS_AUTH, CONFIG["OSS"]["Endpoint"], CONFIG["OSS"]["Bucket"])
 
-def get_signed_pic_url(path, thumbnail=True, size=0):
+def get_signed_pic_url(path, thumbnail=True, size=0, expire=600):
     if "http" in path:
         return path
     if thumbnail:
@@ -22,7 +22,7 @@ def get_signed_pic_url(path, thumbnail=True, size=0):
         style = "image/resize,m_lfit,w_{0},h_{0}".format(size)
     else:
         style = ""
-    url = OSS_BUCKET.sign_url('GET', path, 10 * 60, params={'x-oss-process': style})
+    url = OSS_BUCKET.sign_url('GET', path, expire, params={'x-oss-process': style})
     return url
 
 def create_pic_item(pic_data:PicItemModel):
@@ -137,7 +137,7 @@ def get_pic_detail(pic_id):
     )
 
 def get_original_pic(path):
-    real_url = get_signed_pic_url(path, thumbnail=False)
+    real_url = get_signed_pic_url(path, thumbnail=False, expire=60)
     return SinglePicModel(
         id      = "",
         set_id  = "",
