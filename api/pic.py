@@ -1,5 +1,7 @@
 from bson import ObjectId
 import requests
+from libthumbor import CryptoURL
+import urllib.parse
 
 from fastapi import HTTPException
 import oss2
@@ -16,14 +18,32 @@ OSS_BUCKET = oss2.Bucket(OSS_AUTH, CONFIG["OSS"]["Endpoint"], CONFIG["OSS"]["Buc
 def get_signed_pic_url(path, thumbnail=True, size=0, expire=600):
     if "http" in path:
         return path
-    if thumbnail:
-        size = CONFIG["PIC"]["Thumbnail_Size"]
-    if size !=0:
-        style = "image/resize,m_lfit,w_{0},h_{0}".format(size)
-    else:
-        style = ""
-    url = OSS_BUCKET.sign_url('GET', path, expire, params={'x-oss-process': style})
-    return url
+    if CONFIG["PIC"]["Source"] == "oss":
+        if thumbnail:
+            size = CONFIG["PIC"]["Thumbnail_Size"]
+        if size !=0:
+            style = "image/resize,m_lfit,w_{0},h_{0}".format(size)
+        else:
+            style = ""
+        url = OSS_BUCKET.sign_url('GET', path, expire, params={'x-oss-process': style})
+        return url
+    elif CONFIG["PIC"]["Source"] == "thumbor":
+        crypto = CryptoURL(key=CONFIG["THUMBOR"]["SECURITY_KEY"])
+        path = urllib.parse.quote(path)
+        if thumbnail:
+            size = CONFIG["PIC"]["Thumbnail_Size"]
+        if size !=0:
+            encrypted_url = crypto.generate(
+                width=size,
+                height=size,
+                fit_in=True,
+                image_url=path
+            )
+        else:
+            encrypted_url = crypto.generate(
+                image_url=path
+            )
+        return CONFIG["THUMBOR"]["URL"]+encrypted_url
 
 def create_pic_item(pic_data:PicItemModel):
     pic_data_dict = pic_data.model_dump()
