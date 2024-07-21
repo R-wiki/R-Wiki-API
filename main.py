@@ -15,6 +15,7 @@ from routers.user import user_api_router
 from routers.pic import pic_api_router
 from routers.video import video_api_router
 from routers.lyric import lyric_api_router
+from routers.external import external_api_router
 
 from models.base import BaseResponse
 
@@ -36,6 +37,7 @@ app.include_router(music_api_router)
 app.include_router(lyric_api_router)
 app.include_router(pic_api_router)
 app.include_router(video_api_router)
+app.include_router(external_api_router)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
