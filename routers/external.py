@@ -38,3 +38,15 @@ def get_checklist(
         return BaseResponse()
     else:
         return BaseResponse(status=40303, msg="Failed")
+    
+@external_api_router.get("/decline", response_model=BaseResponse)
+def get_checklist(
+        token: str = ""
+    ):
+    item_type, item_id = ExternalApi.verify_jwt(token)
+    result = ExternalApi.decline(item_type, item_id)
+    if result:
+        user_action_log("External API", item_type, "decline", item_id)
+        return BaseResponse()
+    else:
+        return BaseResponse(status=40303, msg="Failed")

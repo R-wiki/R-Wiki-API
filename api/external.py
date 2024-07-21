@@ -65,13 +65,20 @@ def get_checklist():
 
 def approve(item_type, item_id):
     if item_type == "music":
-        MusicApi.approve_music(item_id)
-        return True
+        return MusicApi.approve_music(item_id)
     elif item_type == "pic":
-        PicApi.approve_pic(item_id)
-        return True
+        return PicApi.approve_pic(item_id)
     elif item_type == "video":
-        VideoApi.approve_video(item_id)
-        return True
+        return VideoApi.approve_video(item_id)
+    else:
+        return False
+
+def decline(item_type, item_id):
+    if item_type == "music":
+        return MusicApi.decline_music(item_id)
+    elif item_type == "pic":
+        return PicApi.decline_pic(item_id)
+    elif item_type == "video":
+        return VideoApi.decline_video(item_id)
     else:
         return False
