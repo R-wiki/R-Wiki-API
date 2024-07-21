@@ -37,7 +37,11 @@ def create_music_item(music_data:MusicInfoModel):
 def approve_music(music_id):
     verify_object_id(music_id)
     try:
-        db.music.update_one({"_id":ObjectId(music_id)}, {"$set":{"show":True}})
+        result = db.music.update_one({"_id":ObjectId(music_id)}, {"$set":{"show":True}})
+        if result.modified_count == 1:
+            return True
+        else:
+            return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
@@ -46,7 +50,11 @@ def approve_music(music_id):
 def decline_music(music_id):
     verify_object_id(music_id)
     try:
-        db.music.delete_one({"_id":ObjectId(music_id)})
+        result = db.music.delete_one({"_id":ObjectId(music_id), "show":False})
+        if result.deleted_count == 1:
+            return True
+        else:
+            return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")

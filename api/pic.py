@@ -72,7 +72,11 @@ def create_pic_item(pic_data:PicItemModel):
 def approve_pic(pic_id):
     verify_object_id(pic_id)
     try:
-        db.pic.update_one({"_id":ObjectId(pic_id)}, {"$set":{"show":True}})
+        result = db.pic.update_one({"_id":ObjectId(pic_id)}, {"$set":{"show":True}})
+        if result.modified_count == 1:
+            return True
+        else:
+            return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
@@ -81,7 +85,11 @@ def approve_pic(pic_id):
 def decline_pic(pic_id):
     verify_object_id(pic_id)
     try:
-        db.pic.delete_one({"_id":ObjectId(pic_id)})
+        result = db.pic.delete_one({"_id":ObjectId(pic_id), "show":False})
+        if result.deleted_count == 1:
+            return True
+        else:
+            return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")

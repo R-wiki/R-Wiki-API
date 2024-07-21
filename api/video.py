@@ -37,7 +37,11 @@ def create_video_item(video_data:VideoItemModel):
 def approve_video(video_id):
     verify_object_id(video_id)
     try:
-        db.video.update_one({"_id":ObjectId(video_id)}, {"$set":{"show":True}})
+        result = db.video.update_one({"_id":ObjectId(video_id)}, {"$set":{"show":True}})
+        if result.modified_count == 1:
+            return True
+        else:
+            return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
@@ -46,11 +50,14 @@ def approve_video(video_id):
 def decline_video(video_id):
     verify_object_id(video_id)
     try:
-        db.video.delete_one({"_id":ObjectId(video_id)})
+        result = db.video.delete_one({"_id":ObjectId(video_id), "show":False})
+        if result.deleted_count == 1:
+            return True
+        else:
+            return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
-    return True
 
 def get_video_list_by_query(query, page, size):
     try:
