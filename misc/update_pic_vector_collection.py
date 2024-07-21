@@ -37,6 +37,11 @@ for i in data:
     pic_info_arr = i.split("/")
     pic_type = pic_type_map.get(pic_info_arr[1], "其他")
     album_name = pic_info_arr[2]
+    album_date_str = album_name.split("_")[0]
+    if pic_type == "生活照":
+        album_date = datetime(int(album_date_str))
+    else:
+        album_date = datetime.strptime(album_date_str, '%Y%m%d')
     file_path = pic_info_arr[3]
     print(pic_type, album_name, file_path)
     update_album = db.pic.find_one(
@@ -51,7 +56,7 @@ for i in data:
         db.pic.insert_one({
             "type"  : pic_type,
             "name"  : album_name,
-            "date"  : datetime.now(),
+            "date"  : album_date,
             "pics"  : [ i ],
             "cover" : i,
             "note"  : "",
