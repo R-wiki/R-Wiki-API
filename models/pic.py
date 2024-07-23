@@ -13,7 +13,6 @@ class PicItemModel(BaseModel):
     pics: List[str] = []
     cover: str = ""
     note: str = ""
-    show: bool = False
 
 class PicDetailModel(PicItemModel):
     urls: List[str] = []

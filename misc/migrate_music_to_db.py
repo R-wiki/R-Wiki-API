@@ -45,7 +45,7 @@ for old_music in music_data:
     if old_music["arranger"]:
         staff.append({"type":"编曲", "name":old_music["arranger"]})
     new_music["staff"] = staff
-    new_music["show"] = True
+    new_music["show"] = 1
     print(new_music)
     db.music.insert_one(new_music)
     print()

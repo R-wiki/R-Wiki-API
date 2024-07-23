@@ -28,7 +28,6 @@ class MusicInfoModel(BaseModel):
     platform: PlatformModel = PlatformModel()
     staff: List[StaffModel] = []
     note: str | None = ""
-    show: bool = False
 
 class MusicIdRequest(BaseModel):
     music_id: str

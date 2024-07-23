@@ -12,7 +12,7 @@ from .general import verify_object_id
 
 def create_music_item(music_data:MusicInfoModel):
     music_data_dict = music_data.model_dump()
-    music_data_dict["show"] = False
+    music_data_dict["show"] = 0
     music_id = music_data_dict.get("id", None)
     del music_data_dict["id"]
     if music_id != None: # Update music
@@ -37,7 +37,7 @@ def create_music_item(music_data:MusicInfoModel):
 def approve_music(music_id):
     verify_object_id(music_id)
     try:
-        result = db.music.update_one({"_id":ObjectId(music_id)}, {"$set":{"show":True}})
+        result = db.music.update_one({"_id":ObjectId(music_id), "show":0}, {"$set":{"show":1}})
         if result.modified_count == 1:
             return True
         else:
@@ -50,15 +50,14 @@ def approve_music(music_id):
 def decline_music(music_id):
     verify_object_id(music_id)
     try:
-        result = db.music.delete_one({"_id":ObjectId(music_id), "show":False})
-        if result.deleted_count == 1:
+        result = db.music.update_one({"_id":ObjectId(music_id), "show":0}, {"$set":{"show":-1}})
+        if result.modified_count == 1:
             return True
         else:
             return False
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
-    return True
 
 def get_music_list_by_query(query, page, size):
     try:
@@ -70,15 +69,15 @@ def get_music_list_by_query(query, page, size):
     return cursor, count
 
 def get_latest_music_list(page,size):
-    cursor, count = get_music_list_by_query({"show": True}, page, size)
+    cursor, count = get_music_list_by_query({"show": 1}, page, size)
     return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor], count
 
 def get_pending_music_list(page,size):
-    cursor, count = get_music_list_by_query({"show": False}, page, size)
+    cursor, count = get_music_list_by_query({"show": 0}, page, size)
     return [MusicInfoModel(id=str(i["_id"]),**i) for i in cursor], count
 
 def get_music_list_by_filter(q, album, solo, platform, language, page, size):
-    query = {"show": True}
+    query = {"show": 1}
     if q:
         query["name"] = {"$regex":q}
     if album:
@@ -174,7 +173,7 @@ def call_aio_api(platform, key):
 def get_music_detail(music_id):
     verify_object_id(music_id)
     try:
-        cursor = db.music.find_one({"_id":ObjectId(music_id), "show":True})
+        cursor = db.music.find_one({"_id":ObjectId(music_id), "show":1})
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")

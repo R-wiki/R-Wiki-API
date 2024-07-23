@@ -23,7 +23,7 @@ for old_pic in pic_data[:]:
         "pics": [i["url"] for i in old_pic["group"]["urls"]],
         "cover": old_pic["group"]["urls"][0]["url"],
         "note": "",
-        "show": True
+        "show": 1
     }
     db.pic.insert_one(new_pic)
     print(new_pic)

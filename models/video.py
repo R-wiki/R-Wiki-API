@@ -13,7 +13,6 @@ class VideoItemModel(BaseModel):
     duration: int
     bvid: str
     cid: str = ""
-    show: bool = False
 
 class VideoListResponse (BaseResponse):
     data: List[VideoItemModel] = []

@@ -12,7 +12,7 @@ from .general import verify_object_id
 
 def create_video_item(video_data:VideoItemModel):
     video_data_dict = video_data.model_dump()
-    video_data_dict["show"] = False
+    video_data_dict["show"] = 0
     video_id = video_data_dict.get("id", None)
     del video_data_dict["id"]
     if video_id != None: # Update video
@@ -37,7 +37,7 @@ def create_video_item(video_data:VideoItemModel):
 def approve_video(video_id):
     verify_object_id(video_id)
     try:
-        result = db.video.update_one({"_id":ObjectId(video_id)}, {"$set":{"show":True}})
+        result = db.video.update_one({"_id":ObjectId(video_id), "show":0}, {"$set":{"show":1}})
         if result.modified_count == 1:
             return True
         else:
@@ -50,8 +50,8 @@ def approve_video(video_id):
 def decline_video(video_id):
     verify_object_id(video_id)
     try:
-        result = db.video.delete_one({"_id":ObjectId(video_id), "show":False})
-        if result.deleted_count == 1:
+        result = db.video.update_one({"_id":ObjectId(video_id), "show":0}, {"$set":{"show":-1}})
+        if result.modified_count == 1:
             return True
         else:
             return False
@@ -69,11 +69,11 @@ def get_video_list_by_query(query, page, size):
     return cursor, count
 
 def get_latest_video_list(page,size):
-    cursor, count = get_video_list_by_query({"show": True}, page, size)
+    cursor, count = get_video_list_by_query({"show": 1}, page, size)
     return [VideoItemModel(id=str(i["_id"]),**i) for i in cursor], count
 
 def get_pending_video_list(page,size):
-    cursor, count = get_video_list_by_query({"show": False}, page, size)
+    cursor, count = get_video_list_by_query({"show": 0}, page, size)
     return [VideoItemModel(id=str(i["_id"]),**i) for i in cursor], count
 
 def get_video_list_by_filter(q, duration, video_type, year, month, page, size):
@@ -83,7 +83,7 @@ def get_video_list_by_filter(q, duration, video_type, year, month, page, size):
         "l": {"duration":{"$gte": 30*60 }}
     }
 
-    query = {"show": True}
+    query = {"show": 1}
     if q:
         query["name"] = {"$regex":q}
     if duration:
@@ -110,7 +110,7 @@ def get_video_list_by_filter(q, duration, video_type, year, month, page, size):
 def get_video_detail(video_id):
     verify_object_id(video_id)
     try:
-        cursor = db.video.find_one({"_id":ObjectId(video_id), "show":True})
+        cursor = db.video.find_one({"_id":ObjectId(video_id), "show":1})
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
@@ -134,7 +134,7 @@ def create_video_by_bvid(bvid, video_type=""):
             bvid            = bvid,
             cid             = str(bili_data["data"]["cid"]),
             duration        = bili_data["data"]["duration"],
-            show            = False
+            show            = 0
         )
     except Exception as e:
         raise HTTPException(50102, "External API Error: Bilibili: "+ str(e))

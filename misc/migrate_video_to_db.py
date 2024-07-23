@@ -36,7 +36,7 @@ for old_video in video_data[:]:
         "bvid": bvid,
         "cid": cid,
         "duration": bili_data["data"]["duration"],
-        "show": True
+        "show": 1
     }
     db.video.insert_one(new_video)
     print(new_video)

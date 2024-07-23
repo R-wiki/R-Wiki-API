@@ -60,7 +60,7 @@ for i in data:
             "pics"  : [ i ],
             "cover" : i,
             "note"  : "",
-            "show"  : True
+            "show"  : 0
         })
         update_album = db.pic.find_one(
             {"type": pic_type, "name": album_name}

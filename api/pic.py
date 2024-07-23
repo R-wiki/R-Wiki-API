@@ -47,7 +47,7 @@ def get_signed_pic_url(path, thumbnail=True, size=0, expire=600):
 
 def create_pic_item(pic_data:PicItemModel):
     pic_data_dict = pic_data.model_dump()
-    pic_data_dict["show"] = False
+    pic_data_dict["show"] = 0
     pic_id = pic_data_dict.get("id", None)
     del pic_data_dict["id"]
     if pic_id != None: # Update pic
@@ -72,7 +72,7 @@ def create_pic_item(pic_data:PicItemModel):
 def approve_pic(pic_id):
     verify_object_id(pic_id)
     try:
-        result = db.pic.update_one({"_id":ObjectId(pic_id)}, {"$set":{"show":True}})
+        result = db.pic.update_one({"_id":ObjectId(pic_id), "show":0}, {"$set":{"show":1}})
         if result.modified_count == 1:
             return True
         else:
@@ -85,8 +85,8 @@ def approve_pic(pic_id):
 def decline_pic(pic_id):
     verify_object_id(pic_id)
     try:
-        result = db.pic.delete_one({"_id":ObjectId(pic_id), "show":False})
-        if result.deleted_count == 1:
+        result = db.pic.update_one({"_id":ObjectId(pic_id), "show":0}, {"$set":{"show":-1}})
+        if result.modified_count == 1:
             return True
         else:
             return False
@@ -105,7 +105,7 @@ def get_pic_list_by_query(query, page, size):
     return cursor, count
 
 def get_latest_pic_list(page,size):
-    cursor, count = get_pic_list_by_query({"show": True}, page, size)
+    cursor, count = get_pic_list_by_query({"show": 1}, page, size)
     pic_item_list = []
     for pic_item in cursor:
         pic_item["id"] = str(pic_item["_id"])
@@ -114,7 +114,7 @@ def get_latest_pic_list(page,size):
     return pic_item_list, count
 
 def get_pending_pic_list(page,size):
-    cursor, count = get_pic_list_by_query({"show": False}, page, size)
+    cursor, count = get_pic_list_by_query({"show": 0}, page, size)
     pic_item_list = []
     for pic_item in cursor:
         pic_item["id"] = str(pic_item["_id"])
@@ -123,7 +123,7 @@ def get_pending_pic_list(page,size):
     return pic_item_list, count
 
 def get_pic_list_by_filter(q, pic_type, year, month, page, size):
-    query = {"show": True}
+    query = {"show": 1}
     if q:
         query["name"] = {"$regex":q}
     if pic_type:
@@ -150,7 +150,7 @@ def get_pic_list_by_filter(q, pic_type, year, month, page, size):
 def get_pic_detail(pic_id):
     verify_object_id(pic_id)
     try:
-        cursor = db.pic.find_one({"_id":ObjectId(pic_id), "show":True})
+        cursor = db.pic.find_one({"_id":ObjectId(pic_id), "show":1})
     except Exception as e:
         print(e)
         raise HTTPException(50101, "Database error.")
