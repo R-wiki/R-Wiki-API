@@ -8,3 +8,6 @@ class BaseResponse(BaseModel):
 class PagingDataModel(BaseModel):
     page: int | None = 1
     size: int | None = 20
+
+class IdRequest(BaseModel):
+    id: str = ""

@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Depends, Header, Body
+from fastapi.security import APIKeyHeader
 
 from pydantic import Field
 
@@ -17,7 +18,9 @@ user_api_router = APIRouter(
     tags=["user"]
 )
 
-def token_required(x_token:Annotated[str, Header()]):
+user_token = APIKeyHeader(name="X-Token")
+
+def token_required(x_token: str = Depends(user_token)):
     user_info = UserApi.get_user_data_by_toekn(x_token)
     return user_info           
 

@@ -29,9 +29,6 @@ class MusicInfoModel(BaseModel):
     staff: List[StaffModel] = []
     note: str | None = ""
 
-class MusicIdRequest(BaseModel):
-    music_id: str
-
 class MusicInfoResponse(BaseResponse):
     data: List[MusicInfoModel]
     total: int

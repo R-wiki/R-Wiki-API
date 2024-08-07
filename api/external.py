@@ -12,6 +12,7 @@ from models.external import ChecklistItemModel
 import api.music as MusicApi
 import api.pic as PicApi
 import api.video as VideoApi
+import api.activity as ActivityApi
 
 SECRET = CONFIG["DEFAULT"]["Secret"]
 
@@ -60,6 +61,14 @@ def get_checklist():
             "content": video.model_dump_json(indent=2),
             "token": generate_jwt("video", video.id)
         })
+    pending_activities, _ = ActivityApi.get_pending_activity_list(1, 50)
+    for activity in pending_activities:
+        checklist.append({
+            "item_id": activity.id,
+            "item_type": "activity",
+            "content": activity.model_dump_json(indent=2),
+            "token": generate_jwt("activity", activity.id)
+        })
 
     return [ChecklistItemModel(**i) for i in checklist], len(checklist)
 
@@ -70,6 +79,8 @@ def approve(item_type, item_id):
         return PicApi.approve_pic(item_id)
     elif item_type == "video":
         return VideoApi.approve_video(item_id)
+    elif item_type == "activity":
+        return ActivityApi.approve_activity(item_id)
     else:
         return False
 
@@ -80,5 +91,7 @@ def decline(item_type, item_id):
         return PicApi.decline_pic(item_id)
     elif item_type == "video":
         return VideoApi.decline_video(item_id)
+    elif item_type == "activity":
+        return ActivityApi.decline_activity(item_id)
     else:
         return False

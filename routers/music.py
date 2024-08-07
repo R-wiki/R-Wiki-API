@@ -5,9 +5,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from .user import token_required
 
-from models.base import BaseResponse, PagingDataModel
+from models.base import BaseResponse, PagingDataModel, IdRequest
 from models.user import UserInfoModel, Level
-from models.music import MusicIdRequest
 from models.music import MusicInfoModel
 from models.music import MusicInfoResponse, MusicDetailResponse
 
@@ -31,23 +30,23 @@ def create_music_item(music_data: Annotated[MusicInfoModel, Body()], current_use
     return BaseResponse()
 
 @music_api_router.post("/approve", response_model=BaseResponse)
-def approve_music_item(music_id_data: Annotated[MusicIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+def approve_music_item(music_id_data: Annotated[IdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = MusicApi.approve_music(music_id_data.music_id)
+    result = MusicApi.approve_music(music_id_data.id)
     if not result:
         raise HTTPException(40303, "Approve/Decline music failed.")
-    user_action_log(current_user.username, "music", "approve", music_id_data.music_id)
+    user_action_log(current_user.username, "music", "approve", music_id_data.id)
     return BaseResponse()
 
 @music_api_router.post("/decline", response_model=BaseResponse)
-def decline_music_item(music_id_data: Annotated[MusicIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+def decline_music_item(music_id_data: Annotated[IdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = MusicApi.decline_music(music_id_data.music_id)
+    result = MusicApi.decline_music(music_id_data.id)
     if not result:
         raise HTTPException(40303, "Approve/Decline music failed.")
-    user_action_log(current_user.username, "music", "decline", music_id_data.music_id)
+    user_action_log(current_user.username, "music", "decline", music_id_data.id)
     return BaseResponse()
 
 @music_api_router.get("/pending", response_model=MusicInfoResponse)
@@ -75,6 +74,6 @@ def get_music_by_filter(
     return MusicInfoResponse(data=data, total=count)
 
 @music_api_router.get("/detail", response_model=MusicDetailResponse)
-def get_music_detail(music_id : str):
-    data = MusicApi.get_music_detail(music_id)
+def get_music_detail(id: str):
+    data = MusicApi.get_music_detail(id)
     return MusicDetailResponse(data=data)
