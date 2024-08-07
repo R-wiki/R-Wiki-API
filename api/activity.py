@@ -7,6 +7,7 @@ from config.db import db
 from models.activity import ActivityModel, ActivityListResponse
 
 from .general import verify_object_id
+from .pic import get_signed_pic_url
 
 def create_activity_item(activity_data: ActivityModel):
     activity_data_dict = activity_data.model_dump()
@@ -67,7 +68,16 @@ def get_activity_list_by_query(query, page, size):
 
 def get_latest_activity_list(page, size):
     cursor, count = get_activity_list_by_query({"show": 1}, page, size)
-    return [ActivityModel(id=str(i["_id"]),**i) for i in cursor], count
+    result = []
+    for item in cursor:
+        temp_item = ActivityModel(
+            id = str(item["_id"]),
+            **item
+        )
+        temp_item.pics = [get_signed_pic_url(i) for i in item["pics"]]
+        result.append(temp_item)
+        
+    return result, count
 
 def get_pending_activity_list(page, size):
     cursor, count = get_activity_list_by_query({"show": 0}, page, size)

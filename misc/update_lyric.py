@@ -33,7 +33,7 @@ def lyric_dumper(lyric):
     )
     return json.loads(completion.choices[0].message.content)["lyric_lines"]
 
-music_list_req = requests.get("https://api.yinlin.wiki/music/latest?size=50")
+music_list_req = requests.get("https://api.yinlin.wiki/music/latest?size=5")
 music_list = music_list_req.json()["data"]
 for music in music_list[:]:
     existing_lyric = db.lyric.find_one({"music_id":ObjectId(music["id"])})

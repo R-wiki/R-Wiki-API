@@ -17,7 +17,7 @@ class ActivityModel(BaseModel):
     name: str
     note: str = ""
     time: datetime
-    pic: List[str] = []
+    pics: List[str] = []
     url: str = ""
     link: List[ActivityLinkModel] = []
 
