@@ -5,9 +5,6 @@ from pydantic import BaseModel, Field, ConfigDict
 
 from .base import BaseResponse
 
-class ActivityIdRequest(BaseModel):
-    activity_id: str
-
 class ActivityLinkModel(BaseModel):
     type: str
     id: str

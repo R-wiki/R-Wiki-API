@@ -24,9 +24,6 @@ class PicListResponse(BaseResponse):
 class PicDetailResponse(BaseResponse):
     data: PicDetailModel
 
-class PicIdRequest(BaseModel):
-    pic_id: str
-
 class SinglePicModel(BaseModel):
     id: str = ""
     set_id: str = ""

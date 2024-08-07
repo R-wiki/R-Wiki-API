@@ -23,10 +23,7 @@ class VideoDetailModel(VideoItemModel):
 
 class VideoDetailResponse(BaseResponse):
     data: VideoDetailModel
-
-class VideoIdRequest(BaseModel):
-    video_id: str
-
+    
 class VideoFastCreateRequest(BaseModel):
     bvid: str
     type: str = ""

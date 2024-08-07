@@ -5,9 +5,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from .user import token_required
 
-from models.base import BaseResponse, PagingDataModel
+from models.base import BaseResponse, PagingDataModel, IdRequest
 from models.user import UserInfoModel, Level
-from models.video import VideoItemModel, VideoDetailResponse, VideoListResponse, VideoIdRequest, VideoFastCreateRequest
+from models.video import VideoItemModel, VideoDetailResponse, VideoListResponse, VideoFastCreateRequest
 
 import api.video as VideoApi
 from api.general import user_action_log
@@ -37,23 +37,23 @@ def create_video_by_bvid(bvid_data: Annotated[VideoFastCreateRequest, Body()], c
     return BaseResponse()
 
 @video_api_router.post("/approve", response_model=BaseResponse)
-def approve_video_item(video_id_data: Annotated[VideoIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+def approve_video_item(video_id_data: Annotated[IdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = VideoApi.approve_video(video_id_data.video_id)
+    result = VideoApi.approve_video(video_id_data.id)
     if not result:
         raise HTTPException(40303, "Approve/Decline video failed.")
-    user_action_log(current_user.username, "video", "approve", video_id_data.video_id, "")
+    user_action_log(current_user.username, "video", "approve", video_id_data.id, "")
     return BaseResponse()
 
 @video_api_router.post("/decline", response_model=BaseResponse)
-def decline_video_item(video_id_data: Annotated[VideoIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+def decline_video_item(video_id_data: Annotated[IdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = VideoApi.decline_video(video_id_data.video_id)
+    result = VideoApi.decline_video(video_id_data.id)
     if not result:
         raise HTTPException(40303, "Approve/Decline video failed.")
-    user_action_log(current_user.username, "video", "decline", video_id_data.video_id, "")
+    user_action_log(current_user.username, "video", "decline", video_id_data.id, "")
     return BaseResponse()
 
 @video_api_router.get("/pending", response_model=VideoListResponse)
@@ -81,6 +81,6 @@ def get_video_by_filter(
     return VideoListResponse(data=data, total=count)
 
 @video_api_router.get("/detail", response_model=VideoDetailResponse)
-def get_video_detail(video_id : str):
-    data = VideoApi.get_video_detail(video_id)
+def get_video_detail(id : str):
+    data = VideoApi.get_video_detail(id)
     return VideoDetailResponse(data=data)

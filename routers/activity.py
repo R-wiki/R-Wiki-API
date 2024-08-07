@@ -6,9 +6,9 @@ from .user import token_required
 
 import api.activity as ActivityApi
 
-from models.base import BaseResponse, PagingDataModel
+from models.base import BaseResponse, PagingDataModel, IdRequest
 from models.user import UserInfoModel, Level
-from models.activity import ActivityModel, ActivityListResponse, ActivityIdRequest
+from models.activity import ActivityModel, ActivityListResponse
 
 from api.general import user_action_log
 
@@ -29,23 +29,23 @@ def create_activity_item(activity_data: Annotated[ActivityModel, Body()], curren
     return BaseResponse()
 
 @activity_api_router.post("/approve", response_model=BaseResponse)
-def approve_activity_item(activity_id_data: Annotated[ActivityIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+def approve_activity_item(activity_id_data: Annotated[IdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = ActivityApi.approve_activity(activity_id_data.activity_id)
+    result = ActivityApi.approve_activity(activity_id_data.id)
     if not result:
         raise HTTPException(40303, "Approve/Decline activity failed.")
-    user_action_log(current_user.username, "activity", "approve", activity_id_data.activity_id)
+    user_action_log(current_user.username, "activity", "approve", activity_id_data.id)
     return BaseResponse()
 
 @activity_api_router.post("/decline", response_model=BaseResponse)
-def decline_activity_item(activity_id_data: Annotated[ActivityIdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
+def decline_activity_item(activity_id_data: Annotated[IdRequest, Body()], current_user: UserInfoModel = Depends(token_required)):
     if current_user.level < Level.APPROVER:
         raise HTTPException(40105, "Permission denied, level < 2.")
-    result = ActivityApi.approve_activity(activity_id_data.activity_id)
+    result = ActivityApi.approve_activity(activity_id_data.id)
     if not result:
         raise HTTPException(40303, "Approve/Decline activity failed.")
-    user_action_log(current_user.username, "activity", "decline", activity_id_data.activity_id)
+    user_action_log(current_user.username, "activity", "decline", activity_id_data.id)
     return BaseResponse()
 
 @activity_api_router.get("/latest", response_model=ActivityListResponse)
